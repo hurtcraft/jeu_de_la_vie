@@ -2,11 +2,14 @@ package GUI;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.io.Console;
 import java.util.ArrayList;
-
 import javax.swing.JPanel;
 
+
+
+
+// une cellule survie au tour suivant si elle est entouré par 2 ou 3 voisine
+// si une case vide est entouré par exactement 3 voisine, elle devient vivante
 public class Grid extends JPanel{
 
 	/**
@@ -16,14 +19,27 @@ public class Grid extends JPanel{
 	private ArrayList<ArrayList<Tile>> grid;
 	private int col;
 	private int raw;
+	private int width;
+	private int height;
 	public Grid(int w_width, int w_height){
 		this.col=(int)(w_width*0.9/Tile.get_width());
 		this.raw=(int)(w_height/Tile.get_height());
 		this.grid=new ArrayList<>();
 		this.init_grid();
+		this.width=this.col*Tile.get_width();
+		this.height=this.raw*Tile.get_height();
 		test();
 	}
-	public void init_grid() {
+	public int get_width() {
+		return this.width;
+	}
+	public int get_height() {
+		return this.height;
+	}
+	public Dimension getPreferredSize() {
+		return new Dimension(this.width+1,this.height+1);
+	}
+	private void init_grid() {
 		ArrayList<Tile> tmp=new ArrayList<>();
 		for(int i = 0; i<this.raw;i++) {
 			for(int j = 0 ; j<this.col;j++) {
@@ -186,6 +202,8 @@ public class Grid extends JPanel{
 		t6.alive();
 		t7.alive();
 		t8.alive();
+		
+		grid.get(0).get(col-1).alive();;
 		System.out.println("aeikgapeiogahigia");
 		
 		

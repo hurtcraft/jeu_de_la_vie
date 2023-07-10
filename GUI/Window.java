@@ -2,10 +2,14 @@
 package GUI;
 
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.Iterator;
+
+import javax.swing.JButton;
 
 // 1 une cellule survie que si elle est entourée par 2 ou 3 voisine
 // 2 une case vide enntouré par 3 voisines devient vivante
@@ -18,9 +22,10 @@ public class Window {
 	private JFrame MyWindow;
 	private final int WIDTH;
 	private final int HEIGHT;
-	private JPanel grid;
+	private Grid grid;
+	private JPanel commands;
 	public Window() {
-		this.WIDTH=1400;
+		this.WIDTH=1700;
 		this.HEIGHT=1000;
 		
 		this.MyWindow=new JFrame("my window");
@@ -29,15 +34,24 @@ public class Window {
 		this.MyWindow.setLocationRelativeTo(null);
 		this.MyWindow.setResizable(true);
 		this.MyWindow.setVisible(true);
-		
+		this.MyWindow.setLayout(new BorderLayout());
+        this.MyWindow.setLocationRelativeTo(null); // Center the frame on the screen
+        init_commands();
 		init_grid();
+		this.MyWindow.pack();
+		
 	}
 
     public void init_grid() {
         this.grid = new Grid(WIDTH, HEIGHT);
         this.grid.setBackground(Color.blue);
-        this.grid.setLayout(new GridLayout(10, 10));
-        this.MyWindow.add(this.grid);
+        this.MyWindow.add(this.grid,BorderLayout.CENTER);
         this.MyWindow.revalidate();
+    }
+    
+    public void init_commands(){
+    	this.commands=new Commands(this.grid);
+    	this.MyWindow.add(this.commands,BorderLayout.EAST);
+    	this.MyWindow.revalidate();
     }
 }
