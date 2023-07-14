@@ -4,7 +4,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
@@ -27,6 +30,10 @@ public class Grid extends JPanel {
 	private int width;
 	private int height;
 	private MouseListener my_mouse_listener;
+	
+	private Timer timer;
+	private TimerTask tmTask;
+
 	public Grid(int w_width, int w_height){
 
 		this.alives_Tiles=new ArrayList<>();
@@ -38,6 +45,15 @@ public class Grid extends JPanel {
 		this.width=this.col*Tile.get_width();
 		this.height=this.raw*Tile.get_height();
 		this.addMouseListener(my_mouse_listener);
+		this.tmTask=new TimerTask() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				next();
+			}
+		};
+		
 	}
 	public int get_width() {
 		return this.width;
@@ -106,10 +122,8 @@ public class Grid extends JPanel {
 		
 		try {
 			Tile neighboor=this.grid.get(y).get(x+1);
-			if(neighboor.is_alive()) {
-				return neighboor;
-			}
-			return null;
+			return neighboor;
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -122,10 +136,9 @@ public class Grid extends JPanel {
 		
 		try {
 			Tile neighboor=this.grid.get(y).get(x-1);
-			if(neighboor.is_alive()) {
-				return neighboor;
-			}
-			return null;
+			return neighboor;
+			
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -138,10 +151,10 @@ public class Grid extends JPanel {
 		
 		try {
 			Tile neighboor=this.grid.get(y-1).get(x);
-			if(neighboor.is_alive()) {
-				return neighboor;
-			}
-			return null;
+			
+			return neighboor;
+			
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -149,15 +162,13 @@ public class Grid extends JPanel {
 		
 	}
 	public Tile get_bot_neighboor(Tile tile) {
+
 		int x=(int)(tile.get_x()/Tile.get_width());
 		int y=(int)(tile.get_y()/Tile.get_height());
 		
 		try {
 			Tile neighboor=this.grid.get(y+1).get(x);
-			if(neighboor.is_alive()) {
-				return neighboor;
-			}
-			return null;
+			return neighboor;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -219,25 +230,32 @@ public class Grid extends JPanel {
 			this.alives_Tiles.add(tile);
 		}
 		
-		repaint();
+		//repaint();
 
 	}
 	public void next(){
 		ArrayList<Tile>neighboors;
+		ArrayList<Tile>alive_neighboors;
+		ArrayList<Tile>dead_neighboors;
 		ArrayList<Tile> next_alives=new ArrayList<>();
 		ArrayList<Tile> next_deaths=new ArrayList<>();
-		//System.out.println(this.alives_Tiles);
 		for (Tile tile : this.alives_Tiles){
 			
 			neighboors=this.get_neighboors(tile);
+			alive_neighboors=this.get_alives_neighboors(neighboors);
+			dead_neighboors=this.get_deads_neighboors(neighboors);
+			dead_or_alive(tile, alive_neighboors,next_alives,next_deaths);
 			
-			dead_or_alive(tile, neighboors,next_alives,next_deaths);
-			System.out.println(next_alives);
+			for (Tile neighboor:dead_neighboors) {
+				neighboors=this.get_neighboors(neighboor);
+				alive_neighboors=this.get_alives_neighboors(neighboors);
+				dead_or_alive(neighboor, alive_neighboors, next_alives, next_deaths);
+			}
 		}
 		
 		this.repaint_deads_tiles(next_deaths);
 		this.repaint_alives_tiles(next_alives);
-		repaint();
+		//repaint();
 		
 	}
 	private void repaint_deads_tiles(ArrayList<Tile> next_deaths) {
@@ -249,7 +267,10 @@ public class Grid extends JPanel {
 	private void repaint_alives_tiles(ArrayList<Tile> next_alives) {
 		for(Tile t:next_alives) {
 			t.alive();
-			this.alives_Tiles.add(t);
+			if(!alives_Tiles.contains(t)) {
+				this.alives_Tiles.add(t);
+			}
+			
 		}
 	}
 	
@@ -268,20 +289,50 @@ public class Grid extends JPanel {
 			//this.alives_Tiles.add(tile);
 			next_alive.add(tile);
 		}
-		
-		
 	}
+	private ArrayList<Tile> get_alives_neighboors(ArrayList<Tile>neighboors) {
+		ArrayList<Tile> alives_neighboors= new ArrayList<>();
+		for(Tile neighboor: neighboors) {
+			if(neighboor.is_alive()) {
+
+				alives_neighboors.add(neighboor);
+			}
+		}
+		return alives_neighboors;
+	}
+	
+	private ArrayList<Tile> get_deads_neighboors(ArrayList<Tile>neighboors) {
+		ArrayList<Tile> deads_neighboors= new ArrayList<>();
+		for(Tile neighboor: neighboors) {
+			if(!neighboor.is_alive()) {
+
+				deads_neighboors.add(neighboor);
+			}
+		}
+		return deads_neighboors;
+	}
+	
 	public void test() {
 		Tile tile = this.grid.get(10).get(10);
 		tile.alive();
-		this.grid.get(10).get(11).alive();
+		this.grid.get(0).get(0).alive();
+		//repaint();
+	}
+	public void mode_auto(Boolean actif,int coeff_vitesse) {
+		long delay=1000/coeff_vitesse;
 
 		
-		grid.get(0).get(col-1).alive();;
-		System.out.println("aeikgapeiogahigia");
-		repaint();
-		
-		
+		if(actif) 
+		{
+			timer.scheduleAtFixedRate(tmTask, 0, delay);
+		}
+		else {
+			timer.cancel();
+			timer.purge();
+			timer=new Timer();
+
+		}
+
 	}
 	
 }

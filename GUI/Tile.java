@@ -21,7 +21,7 @@ public class Tile extends JPanel {
 		this.color=Color.WHITE;
 		this.x=x;
 		this.y=y;
-		
+		this.is_alive=false;
 	}
 	
 	public static int get_width() {

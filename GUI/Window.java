@@ -16,14 +16,16 @@ import javax.swing.JButton;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.text.AbstractDocument.LeafElement;
 
-public class Window {
+public class Window implements Runnable{
 
 	private JFrame MyWindow;
 	private final int WIDTH;
 	private final int HEIGHT;
 	private Grid grid;
 	private JPanel commands;
+	private Thread repaintThread;
 	public Window() {
 		this.WIDTH=1700;
 		this.HEIGHT=1000;
@@ -39,6 +41,7 @@ public class Window {
         
 		init_grid();
 		init_commands();
+		start_paint_loop();
 		this.MyWindow.pack();
 		
 	}
@@ -55,4 +58,24 @@ public class Window {
     	this.MyWindow.add(this.commands,BorderLayout.EAST);
     	this.MyWindow.revalidate();
     }
+    private void start_paint_loop() {
+    	repaintThread=new Thread(this);
+    	repaintThread.start();
+    }
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		double time_per_frame=1000000000/120;
+		long last_frame=System.nanoTime();
+		long now=System.nanoTime();
+		while (true) {
+			now = System.nanoTime();
+			if(now-last_frame>=time_per_frame) {
+				last_frame=now;
+				this.grid.repaint();
+			}
+			
+		}
+		
+	}
 }

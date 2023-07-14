@@ -107,11 +107,18 @@ public class Commands extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		if(e.getSource()==btn_next) {
-			System.out.println("btn next");
 			grid.next();
+			this.grid.mode_auto(false, 1);
 		}
 		if(e.getSource()==btn_go) {
-			System.out.println("btn prev");
+			try {
+				
+				int vitesse=Integer.parseInt(this.cb_box_vitesse.getSelectedItem().toString());
+				this.grid.mode_auto(true, vitesse);
+			} catch (Exception e2) {
+				// TODO: handle exception
+				System.out.println(e2);
+			}
 		}
 
 	}
