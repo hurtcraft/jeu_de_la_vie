@@ -3,32 +3,41 @@ package GUI;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.swing.JPanel;
 
 
 
 
-// une cellule survie au tour suivant si elle est entouré par 2 ou 3 voisine
+// une cellule survie au tour suivant si elle est entouré par 2 ou 3 voisine sinn elle meurt
 // si une case vide est entouré par exactement 3 voisine, elle devient vivante
-public class Grid extends JPanel{
+public class Grid extends JPanel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private ArrayList<ArrayList<Tile>> grid;
+	private ArrayList<Tile> alives_Tiles;
+	//private Map<Tile, ArrayList<Tile>> alives_cells_map;
 	private int col;
 	private int raw;
 	private int width;
 	private int height;
+	private MouseListener my_mouse_listener;
 	public Grid(int w_width, int w_height){
+
+		this.alives_Tiles=new ArrayList<>();
+		this.my_mouse_listener=new MouseListener(this);
 		this.col=(int)(w_width*0.9/Tile.get_width());
 		this.raw=(int)(w_height/Tile.get_height());
 		this.grid=new ArrayList<>();
 		this.init_grid();
 		this.width=this.col*Tile.get_width();
 		this.height=this.raw*Tile.get_height();
-		test();
+		this.addMouseListener(my_mouse_listener);
 	}
 	public int get_width() {
 		return this.width;
@@ -56,7 +65,7 @@ public class Grid extends JPanel{
 		for (int i = 0 ; i<raw ;i++) {
 			for( int j = 0; j < col; j++) {
 				tile=this.grid.get(i).get(j);
-				tile.paintComponent(g);;
+				tile.paintComponent(g);
 			}
 		}
 		
@@ -96,7 +105,11 @@ public class Grid extends JPanel{
 		int y=(int)(tile.get_y()/Tile.get_height());
 		
 		try {
-			return this.grid.get(y).get(x+1);
+			Tile neighboor=this.grid.get(y).get(x+1);
+			if(neighboor.is_alive()) {
+				return neighboor;
+			}
+			return null;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -108,7 +121,11 @@ public class Grid extends JPanel{
 		int y=(int)(tile.get_y()/Tile.get_height());
 		
 		try {
-			return this.grid.get(y).get(x-1);
+			Tile neighboor=this.grid.get(y).get(x-1);
+			if(neighboor.is_alive()) {
+				return neighboor;
+			}
+			return null;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -120,7 +137,11 @@ public class Grid extends JPanel{
 		int y=(int)(tile.get_y()/Tile.get_height());
 		
 		try {
-			return this.grid.get(y-1).get(x);
+			Tile neighboor=this.grid.get(y-1).get(x);
+			if(neighboor.is_alive()) {
+				return neighboor;
+			}
+			return null;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -132,7 +153,11 @@ public class Grid extends JPanel{
 		int y=(int)(tile.get_y()/Tile.get_height());
 		
 		try {
-			return this.grid.get(y+1).get(x);
+			Tile neighboor=this.grid.get(y+1).get(x);
+			if(neighboor.is_alive()) {
+				return neighboor;
+			}
+			return null;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return null;
@@ -179,32 +204,82 @@ public class Grid extends JPanel{
 	}
 	@Override
 	public String toString() {
-		
 		return this.grid.toString();
+	}
+	public void set_up_alive_cell(int y ,int x) {
+		
+		Tile tile=this.grid.get(x).get(y);
+		
+		if(tile.is_alive()) {
+			tile.dead();
+			this.alives_Tiles.remove(tile);
+		}
+		else {
+			tile.alive();
+			this.alives_Tiles.add(tile);
+		}
+		
+		repaint();
+
+	}
+	public void next(){
+		ArrayList<Tile>neighboors;
+		ArrayList<Tile> next_alives=new ArrayList<>();
+		ArrayList<Tile> next_deaths=new ArrayList<>();
+		//System.out.println(this.alives_Tiles);
+		for (Tile tile : this.alives_Tiles){
+			
+			neighboors=this.get_neighboors(tile);
+			
+			dead_or_alive(tile, neighboors,next_alives,next_deaths);
+			System.out.println(next_alives);
+		}
+		
+		this.repaint_deads_tiles(next_deaths);
+		this.repaint_alives_tiles(next_alives);
+		repaint();
+		
+	}
+	private void repaint_deads_tiles(ArrayList<Tile> next_deaths) {
+		for(Tile t:next_deaths) {
+			t.dead();
+			this.alives_Tiles.remove(t);
+		}
+	}
+	private void repaint_alives_tiles(ArrayList<Tile> next_alives) {
+		for(Tile t:next_alives) {
+			t.alive();
+			this.alives_Tiles.add(t);
+		}
+	}
+	
+	private void dead_or_alive(Tile tile , ArrayList<Tile> neighboors,ArrayList<Tile> next_alive,ArrayList<Tile> next_deaths){
+		// cas cellule vivante
+		if(tile.is_alive()) {
+			if(neighboors.size()<2 || neighboors.size()>3){
+				//this.alives_Tiles.remove(tile);
+				next_deaths.add(tile);
+			}
+			return;
+		}
+		
+		//cas cellule morte
+		if(neighboors.size()==3) {
+			//this.alives_Tiles.add(tile);
+			next_alive.add(tile);
+		}
+		
+		
 	}
 	public void test() {
 		Tile tile = this.grid.get(10).get(10);
-		Tile t =get_right_neighboor(tile);
-		Tile t2=get_left_neighboor(tile);
-		Tile t3=get_bot_neighboor(tile);
-		Tile t4=get_top_neighboor(tile);
-		
-		Tile t5=get_top_left_neighboor(tile);
-		Tile t6=get_top_right_neighboor(tile);
-		Tile t7=get_bot_left_neighboor(tile);
-		Tile t8=get_bot_right_neighboor(tile);
 		tile.alive();
-		t.alive();
-		t2.alive();
-		t3.alive();
-		t4.alive();
-		t5.alive();
-		t6.alive();
-		t7.alive();
-		t8.alive();
+		this.grid.get(10).get(11).alive();
+
 		
 		grid.get(0).get(col-1).alive();;
 		System.out.println("aeikgapeiogahigia");
+		repaint();
 		
 		
 	}

@@ -14,6 +14,7 @@ public class Tile extends JPanel {
 	private static int width=10;
 	private static int height=10;
 	private Color color;
+	private boolean is_alive;
 	private int x;
 	private int y;
 	public Tile(int x , int y) {
@@ -46,13 +47,19 @@ public class Tile extends JPanel {
 	public Dimension getPreferredSize() {
 	    return new Dimension(Tile.width, Tile.height);
 	}
+	public Boolean is_alive() {
+		return this.is_alive;
+	}
 	public void alive() {
+		
 		this.color=Color.BLACK;
-		repaint();
+		this.is_alive=true;
+		this.repaint();
 	}
 	public void dead() {
 		this.color=Color.WHITE;
-		repaint();
+		this.is_alive=false;
+		this.repaint();
 	}
 	public String toString() {
 		return new String(this.x+" : "+this.y);

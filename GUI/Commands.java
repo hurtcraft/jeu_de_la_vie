@@ -108,6 +108,7 @@ public class Commands extends JPanel implements ActionListener{
 		// TODO Auto-generated method stub
 		if(e.getSource()==btn_next) {
 			System.out.println("btn next");
+			grid.next();
 		}
 		if(e.getSource()==btn_go) {
 			System.out.println("btn prev");

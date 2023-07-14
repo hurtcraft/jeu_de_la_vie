@@ -35,9 +35,10 @@ public class Window {
 		this.MyWindow.setResizable(true);
 		this.MyWindow.setVisible(true);
 		this.MyWindow.setLayout(new BorderLayout());
-        this.MyWindow.setLocationRelativeTo(null); // Center the frame on the screen
-        init_commands();
+        //this.MyWindow.setLocationRelativeTo(null); // Center the frame on the screen
+        
 		init_grid();
+		init_commands();
 		this.MyWindow.pack();
 		
 	}
