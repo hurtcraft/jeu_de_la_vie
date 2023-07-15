@@ -7,6 +7,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.Iterator;
 
 import javax.swing.JButton;
@@ -34,14 +36,14 @@ public class Window implements Runnable{
 		this.MyWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.MyWindow.setSize(this.WIDTH, this.HEIGHT); 
 		this.MyWindow.setLocationRelativeTo(null);
-		this.MyWindow.setResizable(true);
+		this.MyWindow.setResizable(false);
 		this.MyWindow.setVisible(true);
 		this.MyWindow.setLayout(new BorderLayout());
-        //this.MyWindow.setLocationRelativeTo(null); // Center the frame on the screen
-        
 		init_grid();
 		init_commands();
 		start_paint_loop();
+        
+
 		this.MyWindow.pack();
 		
 	}

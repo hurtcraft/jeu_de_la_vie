@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,9 +31,11 @@ public class Grid extends JPanel {
 	private int width;
 	private int height;
 	private MouseListener my_mouse_listener;
-	
+	private static Random random;
 	private Timer timer;
 	private TimerTask tmTask;
+	
+	private int generation;
 
 	public Grid(int w_width, int w_height){
 
@@ -45,6 +48,9 @@ public class Grid extends JPanel {
 		this.width=this.col*Tile.get_width();
 		this.height=this.raw*Tile.get_height();
 		this.addMouseListener(my_mouse_listener);
+		this.generation=0;
+		Grid.random=new Random();
+		this.timer=new Timer();
 		this.tmTask=new TimerTask() {
 			
 			@Override
@@ -86,7 +92,9 @@ public class Grid extends JPanel {
 		}
 		
 	}
-	
+	public int get_generation() {
+		return this.generation;
+	}
 	
 	public ArrayList<Tile> get_neighboors(Tile tile){
 		ArrayList<Tile> neighboors= new ArrayList<>();
@@ -255,7 +263,7 @@ public class Grid extends JPanel {
 		
 		this.repaint_deads_tiles(next_deaths);
 		this.repaint_alives_tiles(next_alives);
-		//repaint();
+		this.generation++;
 		
 	}
 	private void repaint_deads_tiles(ArrayList<Tile> next_deaths) {
@@ -318,6 +326,32 @@ public class Grid extends JPanel {
 		this.grid.get(0).get(0).alive();
 		//repaint();
 	}
+	public void random_tiles() {
+		Tile tile ;
+		for (int i = 0; i < this.grid.size(); i++) {
+			for(int j = 0; j<this.grid.get(0).size();j++) {
+				
+				if(Grid.random.nextInt(5)==0) {
+					
+					tile=this.grid.get(i).get(j);
+					tile.alive();
+					this.alives_Tiles.add(tile);
+				}
+			}
+		}
+	}
+	public void clear() {
+		Tile tile;
+		Iterator<Tile> i =this.alives_Tiles.iterator();
+		while(i.hasNext()) {
+			tile=i.next();
+			tile.dead();
+			i.remove();
+		}
+		this.mode_auto(false, 1);
+		this.generation=0;
+		
+	}
 	public void mode_auto(Boolean actif,int coeff_vitesse) {
 		long delay=1000/coeff_vitesse;
 
@@ -328,10 +362,18 @@ public class Grid extends JPanel {
 		}
 		else {
 			timer.cancel();
-			timer.purge();
 			timer=new Timer();
+			tmTask=new TimerTask() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					next();
+				}
+			};
 
 		}
+
 
 	}
 	

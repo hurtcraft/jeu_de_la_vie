@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.print.event.PrintJobAttributeEvent;
 import javax.swing.JButton;
@@ -28,19 +30,26 @@ public class Commands extends JPanel implements ActionListener{
 	private JCheckBox chk_auto;
 	private JComboBox<String> cb_box_vitesse;
 	private JTextArea mode_emploi;
+	private JLabel lb_generation;
+	private int current_generation;
+	private JButton btn_population_aleatoire;
+	private JButton btn_clear;
+	private JButton btn_stop;
 	private Grid grid;
 
 	public Commands(Grid grid){
 		this.grid=grid;
+		this.current_generation=this.grid.get_generation();
 		init_btn_next();
 		init_check_auto();
 		init_cb_box_vitesse();
 		init_btn_go();
+		init_btn_stop();
 		init_lb_mode_emploi();
-		
-		
-		
-		//this.setLayout(new FlowLayout(FlowLayout.CENTER,10,10));
+		init_lb_generation();
+		init_btn_aleatoire();
+		init_btn_clear();
+		generation_listener();
 		
 	}
 	public Dimension getPreferredSize() {
@@ -57,7 +66,7 @@ public class Commands extends JPanel implements ActionListener{
 		this.btn_go.setVisible(false);
 		this.add(btn_go);
 	}
-	private void init_check_auto() {
+ 	private void init_check_auto() {
 		this.chk_auto=new JCheckBox("mode auto");
 		this.chk_auto.addItemListener(new ItemListener() {
 			
@@ -67,11 +76,14 @@ public class Commands extends JPanel implements ActionListener{
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					cb_box_vitesse.setVisible(true);
 					btn_go.setVisible(true);
+					btn_stop.setVisible(true);
 					btn_next.setVisible(false);
 				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
 					cb_box_vitesse.setVisible(false);
 					btn_go.setVisible(false);
+					btn_stop.setVisible(false);
 					btn_next.setVisible(true);
+					
 				}
 			}
 		});
@@ -92,17 +104,61 @@ public class Commands extends JPanel implements ActionListener{
 	private void init_lb_mode_emploi() {
 		String txt = "[next] --> pour une simulation pas à pas \n[mode auto] --> pour une simulation auto";
 
-		JTextArea mode_emploi = new JTextArea(txt);
+		this.mode_emploi = new JTextArea(txt);
 		mode_emploi.setPreferredSize(new Dimension(250,50));
 		mode_emploi.setEditable(false);
 		mode_emploi.setLineWrap(true);
 		mode_emploi.setWrapStyleWord(true);
 		this.add(mode_emploi);
 	}
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+	private void init_lb_generation() {
+		this.lb_generation=new JLabel();
+		this.add(this.lb_generation);
+		
+	}
+	private void generation_listener(){
+		TimerTask listen_generation= new TimerTask() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if(grid.get_generation()!=current_generation) {
+					current_generation=grid.get_generation();
+					set_generation(current_generation);
+				}
+			}
+		};
+		
+		Timer t = new Timer();
+		t.scheduleAtFixedRate(listen_generation, 0, 10);
+		
 	}
 	
+	public void set_generation(int generation) {
+		this.lb_generation.setText("generation : "+String.valueOf(generation));
+	}
+	
+	private void init_btn_aleatoire() {
+		this.btn_population_aleatoire=new JButton();
+		this.btn_population_aleatoire.setText("generer des cellules aléatoires");
+		this.btn_population_aleatoire.addActionListener(this);
+		this.add(this.btn_population_aleatoire);
+	}
+	private void init_btn_clear() {
+		this.btn_clear=new JButton();
+		this.btn_clear.setText("clear");
+		this.btn_clear.addActionListener(this);
+		this.add(this.btn_clear);
+	}
+	private void init_btn_stop() {
+		// TODO Auto-generated method stub
+		
+		this.btn_stop=new JButton();
+		this.btn_stop.setText("stop");
+		this.btn_stop.setVisible(false);
+		this.btn_stop.addActionListener(this);
+		this.add(this.btn_stop);
+	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
@@ -110,6 +166,7 @@ public class Commands extends JPanel implements ActionListener{
 			grid.next();
 			this.grid.mode_auto(false, 1);
 		}
+		
 		if(e.getSource()==btn_go) {
 			try {
 				
@@ -119,6 +176,16 @@ public class Commands extends JPanel implements ActionListener{
 				// TODO: handle exception
 				System.out.println(e2);
 			}
+		}
+		if(e.getSource()==btn_stop) {
+			this.grid.mode_auto(false, 1);
+		}
+		
+		if(e.getSource()==this.btn_population_aleatoire) {
+			this.grid.random_tiles();
+		}
+		if(e.getSource()==this.btn_clear) {
+			this.grid.clear();
 		}
 
 	}
